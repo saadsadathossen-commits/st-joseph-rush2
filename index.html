@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>St. Joseph Rush: The 7:50 Mission</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #111;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #game-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            background: linear-gradient(to bottom, #2c3e50, #bdc3c7);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0,255,0,0.3);
+        }
+        /* Top HUD */
+        .hud {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 12px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #27ae60;
+        }
+        .timer {
+            font-size: 22px;
+            font-weight: bold;
+            color: #f1c40f;
+        }
+        .status-bar {
+            font-size: 14px;
+            color: #ecf0f1;
+        }
+        /* Game Screen / Scene */
+        .scene-box {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2c3e50;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            margin: auto 0;
+        }
+        .obstacle-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #c0392b;
+            margin-bottom: 8px;
+        }
+        .dialogue {
+            font-size: 15px;
+            font-style: italic;
+            margin-bottom: 15px;
+            color: #34495e;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .hero-reply {
+            font-size: 15px;
+            font-weight: bold;
+            color: #2980b9;
+            background: #d1ecf1;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        /* Choices Button */
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .choice-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .choice-btn:hover {
+            background: #219653;
+            transform: scale(1.02);
+        }
+        /* Footer/Progress */
+        .progress-indicator {
+            text-align: center;
+            font-size: 14px;
+            color: #2c3e50;
+            font-weight: bold;
+            background: #fff;
+            padding: 8px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <!-- HUD -->
+    <div class="hud">
+        <div class="timer" id="timer-display">⏰ ৭:০০ AM</div>
+        <div class="status-bar" id="level-display">মিশন: স্টেজ ১/৫</div>
+    </div>
+
+    <!-- Main Game Arena -->
+    <div class="scene-box" id="game-box">
+        <div class="obstacle-title" id="obs-title">লোডিং...</div>
+        <div class="dialogue" id="obs-dialogue">লোডিং...</div>
+        <div class="hero-reply" id="hero-reply">তোমার সায়েন্সের উত্তর এখানে আসবে...</div>
+        <div class="choices" id="choices-container">
+            <!-- Buttons will load dynamically -->
+        </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-indicator" id="progress-text">
+        লোকেশন: ফার্মগেট মোড় ➔ সেন্ট যোসেফ গেইট
+    </div>
+</div>
+
+<script>
+    const stages = [
+        {
+            title: "১. ট্রাফিক সার্জেন্ট ও লেগুনা মামা",
+            location: "ফার্মগেট মোড়",
+            time: "⏰ ৭:১০ AM",
+            dialogue: "সার্জেন্ট মামা: এই মিয়া! উল্টাপাল্টা লেনে লেগুনা ঢুকাইছো কেন? লাইসেন্স কই? আর ৫ মিনিট দাঁড়ালে জরিমানা খাবি!",
+            replyOptions: [
+                {
+                    text: "সায়েন্সের ভাষায় বুঝিয়ে বলুন (ডপলার ইফেক্ট)",
+                    response: "সাদ (Josephite): 'মামা, আপনার ভয়েসের ফ্রিকোয়েন্সি যত বাড়ছে, আমার আপেক্ষিক বেগ (Relative Velocity) তত ত্বরান্বিত হচ্ছে। ডপলার ইফেক্ট অনুযায়ী শব্দ উৎস থেকে দূরে সরে যাচ্ছে, সুতরাং জরিমানা মওকুফ করুন!'",
+                    nextTime: "⏰ ৭:১৭ AM"
+                },
+                {
+                    text: "আইনস্টাইনের থিওরি দিয়ে এড়িয়ে যান",
+                    response: "সাদ (Josephite): 'মামা, সময় আপেক্ষিক (Time Dilation)! আপনার কাছে ৫ মিনিট মনে হলেও আমার কাছে এটা আলোকবর্ষের সমান। আমি আইনস্টাইনের স্পিড অফ লাইট ব্রেক করে কলেজে যাচ্ছি!'",
+                    nextTime: "⏰ ৭:২০ AM"
+                }
+            ]
+        },
+        {
+            title: "২. রিকশাওয়ালা বক্কেবলাই",
+            location: "কাটাসুর রোড",
+            time: "⏰ ৭:২২ AM",
+            dialogue: "রিকশাওয়ালা: কুন জায়গায় যাবেন ভাইজান? মোহাম্মাদপুর স্ট্যান্ড? ১০০ টেকা বারি ভাড়া! সকালবেলা জ্যামের মধে প্যাঁচাইন না!",
+            replyOptions: [
+                {
+                    text: "প্যাসকালস ল বা হাইড্রোলিক প্রেসার দিয়ে উত্তর দিন",
+                    response: "সাদ (Josephite): 'ভাই, আপনার রিকশার টায়ারের প্রেসার প্যাসকালের সূত্র মানছে না। ক্ষেত্রফল কম, চাপ বেশি—তাই ১০০ টাকা বেশি চাওয়া বলবিদ্যার বিরুদ্ধে অপরাধ। ৫০ টাকায় ফ্রিকশন কমান!'",
+                    nextTime: "⏰ ৭:২৮ AM"
+                },
+                {
+                    text: "নিউটনের থার্ড ল প্রয়োগ করুন",
+                    response: "সাদ (Josephite): 'প্রত্যেক ক্রিয়ারই সমান ও বিপরীত প্রতিক্রিয়া আছে ভাই। আপনি অতিরিক্ত ভাড়া চাইলে আমার পকেটের এনার্জি লস হবে, যার বিপরীত প্রতিক্রিয়ায় আপনি কোনো প্যাসেঞ্জারই পাবেন না!'",
+                    nextTime: "⏰ ৭:৩০ AM"
+                }
+            ]
+        },
+        {
+            title: "৩. ফুটপাতের চা-দোকানি চাচা",
+            location: "আসাদগেট সিগন্যাল",
+            time: "⏰ ৭:৩৫ AM",
+            dialogue: "চা চাচা: এই যোসেফের পোলা! কালকে বাকি খাইয়া টেকা দোস নাই। আজকে চা খাবি তো আগে বাকি শোধ কর!",
+            replyOptions: [
+                {
+                    text: "অর্গানিক কেমিস্ট্রির বিক্রিয়া দিয়ে বুঝিয়ে দিন",
+                    response: "সাদ (Josephite): 'চাচা, আমার বাকি টাকার হিসাবটা বেনজিন রিংয়ের মতো রেজোন্যান্স স্টেটে আছে। দুপুরের পর এসে ক্যাশ পেমেন্ট মানে নিউক্লিওফিলিক সাবস্টিটিউশন রিঅ্যাকশন ঘটিয়ে দেবোনে!'",
+                    nextTime: "⏰ ৭:৪২ AM"
+                },
+                {
+                    text: "থার্মোডাইনামিক্সের ল' শোনান",
+                    response: "সাদ (Josephite): 'চাচা, এনার্জি কনজারভেশন ল' অনুসারে আমার পকেটের ক্যাশ এনার্জি বর্তমানে জিরো কেভ্যালিতে আছে। এটা এন্ট্রপি (Entropy) বৃদ্ধি করছে, চাপ নেবেন না!'",
+                    nextTime: "⏰ ৭:৪৪ AM"
+                }
+            ]
+        },
+        {
+            title: "৪. স্কুল গেইটের করা পাহারা",
+            location: "সেন্ট যোসেফ মূল গেট",
+            time: "⏰ ৭:৪৯ AM",
+            dialogue: "গেটকিপার কাকা: এই যে বাবা! ঘড়িতে কয়টা বাজে দেখছ? ৭:৪৯ বাজে! এক মিনিট পরে গেইট চাবি মেরে বন্ধ করে দেবো!",
+            replyOptions: [
+                {
+                    text: "কোয়ান্টাম মেকানিক্স দিয়ে শেষ মুহূর্তের এন্ট্রি",
+                    response: "সাদ (Josephite): 'কাকা, কোয়ান্টাম আনসার্টেন্টি প্রিন্সিপাল অনুযায়ী আমি ঠিক এই মুহূর্তে গেটের ভেতর এবং বাইরে একই সাথে অবস্থান করছি। আমাকে ভেতরে এন্ট্রি দিতেই হবে!'",
+                    nextTime: "⏰ ৭:৫০ AM (ভিক্টরি!)"
+                }
+            ]
+        }
+    ];
+
+    let currentStage = 0;
+
+    function loadStage() {
+        if (currentStage >= stages.length) {
+            document.getElementById("game-container").innerHTML = `
+                <div style="text-align: center; margin: auto;">
+                    <h1 style="color: #27ae60; margin-bottom: 15px;">🎉 অভিনন্দন, সাদ!</h1>
+                    <p style="font-size: 16px; margin-bottom: 20px; color: #fff;">তুমি একদম ঠিক সময়ে (৭:৫০ এ) সেন্ট যোসেফ কলেজের ক্যাম্পাসে ঢুকে গেছো! একজন সত্যিকারের Josephite-এর মতোই মিশন সফল!</p>
+                    <button class="choice-btn" onclick="location.reload()">আবার খেলো</button>
+                </div>
+            `;
+            return;
+        }
+
+        const stage = stages[currentStage];
+        document.getElementById("timer-display").innerText = stage.time;
+        document.getElementById("level-display").innerText = `মিশন: স্টেজ ${currentStage + 1}/৪`;
+        document.getElementById("obs-title").innerText = stage.title;
+        document.getElementById("obs-dialogue").innerText = stage.dialogue;
+        document.getElementById("hero-reply").innerText = "সাদ কীভাবে উত্তর দেবে? নিচে থেকে সিলেক্ট করো 👇";
+        document.getElementById("progress-text").innerText = `লোকেশন: ${stage.location}`;
+
+        const container = document.getElementById("choices-container");
+        container.innerHTML = "";
+
+        stage.replyOptions.forEach((opt, index) => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn";
+            btn.innerText = opt.text;
+            btn.onclick = () => {
+                document.getElementById("hero-reply").innerText = opt.response;
+                container.innerHTML = `<button class="choice-btn" style="background: #e67e22;" onclick="nextStage()">পরের স্টেপে যাও ➔</button>`;
+            };
+            container.appendChild(btn);
+        });
+    }
+
+    function nextStage() {
+        currentStage++;
+        loadStage();
+    }
+
+    // Initialize game
+    loadStage();
+</script>
+
+</body>
+</html>
